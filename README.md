@@ -9,11 +9,11 @@ You can **copy and paste this entire block** directly into the `README.md` file 
 
 -----
 
-# 🌟 YouTube Comment Sentiment Analyzer 🤖💬
+# 🌟 YouTube Comment Sentiment Analyser 🤖💬
 
 ### Project Overview
 
-The **YouTube Comment Sentiment Analyzer** is a two-part application that provides real-time sentiment analysis of comments on any YouTube video. It consists of a **Chrome Extension (Frontend)** communicating with a containerized **Python/Machine Learning (ML) API (Backend)** to classify comments as **Positive, Negative, or Neutral**.
+The **YouTube Comment Sentiment Analyser** is a two-part application that provides real-time sentiment analysis of comments on any YouTube video. It consists of a **Chrome Extension (Frontend)** communicating with a containerized **Python/Machine Learning (ML) API (Backend)** to classify comments as **Positive, Negative, or Neutral**.
 
 This project demonstrates a complete MLOps workflow, focusing on model reproducibility and deployment readiness.
 
@@ -49,15 +49,15 @@ The code base is protected by an automated CI pipeline. Every commit triggers a 
 
 ### 💻 Live Demonstration
 
-See the YouTube Comment Analyzer working live on a local system, demonstrating real-time comment fetching and sentiment classification.
+See the YouTube Comment Analyser working live on a local system, demonstrating real-time comment fetching and sentiment classification.
 
-[Insert Video of Project Working on My Local System Here]
 
+https://github.com/srvmann/yt-chrome-plugin/blob/master/Recording%202025-10-29%20210828.mp4
 -----
 
-### ⚙️ Local Reproduction Guide: ML Pipeline & Containerized API
+### ⚙️ Local Reproduction Guide: ML Pipeline & Containerised API
 
-This guide details how to reproduce the project by first pulling the DVC-tracked model artifacts and then running the final application using the original container structure.
+This guide details how to reproduce the project by first pulling the DVC-tracked model artefacts and then running the final application using the original container structure.
 
 #### Prerequisites
 
@@ -80,11 +80,11 @@ This guide details how to reproduce the project by first pulling the DVC-tracked
     pip install -e .
     ```
 
-#### Step 2: Reproduce Model Artifacts (DVC Pipeline)
+#### Step 2: Reproduce Model Artefacts (DVC Pipeline)
 
 The trained model and data dependencies are versioned using DVC. This step retrieves them, ensuring the API has the necessary files to run.
 
-1.  **Retrieve Artifacts:** This pulls the trained model (the artifact) from the DVC remote storage.
+1.  **Retrieve Artefacts:** This pulls the trained model (the artefact) from the DVC remote storage.
     ```bash
     # Requires AWS credentials to be configured in your environment
     dvc pull
@@ -94,7 +94,7 @@ The trained model and data dependencies are versioned using DVC. This step retri
     dvc repro
     ```
 
-#### Step 3: Run Containerized API (`app.py`)
+#### Step 3: Run Containerised API (`app.py`)
 
 1.  **Set Environment Variable:** Pass your required YouTube Data API Key.
 
