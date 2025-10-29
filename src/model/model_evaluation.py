@@ -1,47 +1,41 @@
-import os
-import json
-import logging
-import pickle
-import yaml
 import numpy as np
 import pandas as pd
-
-# ML/Sklearn imports
+import pickle
+import logging
+import yaml
 import mlflow
 import mlflow.sklearn
 from sklearn.metrics import classification_report, confusion_matrix
 from sklearn.feature_extraction.text import TfidfVectorizer
-
-# Visualization imports
+import os
 import matplotlib.pyplot as plt
 import seaborn as sns
+import json
+from mlflow.models import infer_signature
 
-
-# --- Logging Configuration ---
+# logging configuration
 logger = logging.getLogger('model_evaluation')
 logger.setLevel('DEBUG')
 
-# Ensure handlers are only configured once
-if not logger.handlers:
-    console_handler = logging.StreamHandler()
-    console_handler.setLevel('DEBUG')
+console_handler = logging.StreamHandler()
+console_handler.setLevel('DEBUG')
 
-    file_handler = logging.FileHandler('model_evaluation_errors.log')
-    file_handler.setLevel('ERROR')
+file_handler = logging.FileHandler('model_evaluation_errors.log')
+file_handler.setLevel('ERROR')
 
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    console_handler.setFormatter(formatter)
-    file_handler.setFormatter(formatter)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+console_handler.setFormatter(formatter)
+file_handler.setFormatter(formatter)
 
-    logger.addHandler(console_handler)
-    logger.addHandler(file_handler)
+logger.addHandler(console_handler)
+logger.addHandler(file_handler)
 
 
 def load_data(file_path: str) -> pd.DataFrame:
     """Load data from a CSV file."""
     try:
         df = pd.read_csv(file_path)
-        df.fillna('', inplace=True)
+        df.fillna('', inplace=True)  # Fill any NaN values
         logger.debug('Data loaded and NaNs filled from %s', file_path)
         return df
     except Exception as e:
@@ -92,7 +86,7 @@ def evaluate_model(model, X_test: np.ndarray, y_test: np.ndarray):
         y_pred = model.predict(X_test)
         report = classification_report(y_test, y_pred, output_dict=True)
         cm = confusion_matrix(y_test, y_pred)
-
+        
         logger.debug('Model evaluation completed')
 
         return report, cm
@@ -115,14 +109,13 @@ def log_confusion_matrix(cm, dataset_name):
     mlflow.log_artifact(cm_file_path)
     plt.close()
 
-
 def save_model_info(run_id: str, model_path: str, file_path: str) -> None:
-    """Save the model run ID and artifact path to a JSON file."""
+    """Save the model run ID and path to a JSON file."""
     try:
         # Create a dictionary with the info you want to save
         model_info = {
             'run_id': run_id,
-            'model_path': model_path # This is the internal artifact path (e.g., 'lgbm_model')
+            'model_path': model_path
         }
         # Save the dictionary as a JSON file
         with open(file_path, 'w') as file:
@@ -134,52 +127,50 @@ def save_model_info(run_id: str, model_path: str, file_path: str) -> None:
 
 
 def main():
-    # NOTE: Set the correct public IP for your MLflow tracking server
     mlflow.set_tracking_uri("http://13.203.227.156:5000/")
 
     mlflow.set_experiment('dvc-pipeline')
-
+    
     with mlflow.start_run() as run:
         try:
-            # Determine project root based on file structure
-            script_dir = os.path.dirname(os.path.abspath(__file__))
-            root_dir = os.path.abspath(os.path.join(script_dir, '..', '..'))
-
             # Load parameters from YAML file
+            root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../'))
             params = load_params(os.path.join(root_dir, 'params.yaml'))
 
-            # Log parameters (from params.yaml)
+            # Log parameters
             for key, value in params.items():
                 mlflow.log_param(key, value)
-
+            
             # Load model and vectorizer
             model = load_model(os.path.join(root_dir, 'lgbm_model.pkl'))
             vectorizer = load_vectorizer(os.path.join(root_dir, 'tfidf_vectorizer.pkl'))
 
-            # Log model parameters (from the model object itself)
-            if hasattr(model, 'get_params'):
-                for param_name, param_value in model.get_params().items():
-                    mlflow.log_param(param_name, param_value)
-
-            # Load test data
-            test_data_path = os.path.join(root_dir, 'data/interim/test_processed.csv')
-            test_data = load_data(test_data_path)
+            # Load test data for signature inference
+            test_data = load_data(os.path.join(root_dir, 'data/interim/test_processed.csv'))
 
             # Prepare test data
-            X_test_text = test_data['clean_comment'].values
+            X_test_tfidf = vectorizer.transform(test_data['clean_comment'].values)
             y_test = test_data['category'].values
 
-            # Transform test data
-            X_test_tfidf = vectorizer.transform(X_test_text)
+            # Create a DataFrame for signature inference (using first few rows as an example)
+            input_example = pd.DataFrame(X_test_tfidf.toarray()[:5], columns=vectorizer.get_feature_names_out())  # <--- Added for signature
 
-            # Log model
-            model_artifact_name = "lgbm_model"
-            mlflow.sklearn.log_model(model, model_artifact_name)
+            # Infer the signature
+            signature = infer_signature(input_example, model.predict(X_test_tfidf[:5]))  # <--- Added for signature
+
+            # Log model with signature
+            mlflow.sklearn.log_model(
+                model,
+                "lgbm_model",
+                signature=signature,  # <--- Added for signature
+                input_example=input_example  # <--- Added input example
+            )
 
             # Save model info
-            save_model_info(run.info.run_id, model_artifact_name, 'experiment_info.json')
+            model_path = "lgbm_model"
+            save_model_info(run.info.run_id, model_path, 'experiment_info.json')
 
-            # Log the vectorizer as a separate artifact
+            # Log the vectorizer as an artifact
             mlflow.log_artifact(os.path.join(root_dir, 'tfidf_vectorizer.pkl'))
 
             # Evaluate model and get metrics
@@ -193,9 +184,6 @@ def main():
                         f"test_{label}_recall": metrics['recall'],
                         f"test_{label}_f1-score": metrics['f1-score']
                     })
-                elif label in ['accuracy']:
-                    mlflow.log_metric(f"test_{label}", metrics)
-
 
             # Log confusion matrix
             log_confusion_matrix(cm, "Test Data")
@@ -205,12 +193,9 @@ def main():
             mlflow.set_tag("task", "Sentiment Analysis")
             mlflow.set_tag("dataset", "YouTube Comments")
 
-            logger.info(f"MLflow Run completed successfully. Run ID: {mlflow.active_run().info.run_id}")
-
         except Exception as e:
             logger.error(f"Failed to complete model evaluation: {e}")
             print(f"Error: {e}")
-
 
 if __name__ == '__main__':
     main()
