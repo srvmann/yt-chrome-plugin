@@ -1,57 +1,133 @@
 yt-chrome-plugin
 ==============================
 
-A ML project that scrape the comments from the current video using youtube API,and analyze them and give them sentiment {positive,negative,neutral} using a ml model from flask_app which operates as backend.
+An ML project that scrapes the comments from the current video using the YouTube API, analyses them and gives them sentiment {positive, negative, neutral} using an ML model from flask_app, which operates as a  backend.
 
-Project Organization
-------------
+This is the final, complete, and fully formatted **README.md** file, incorporating all the project details, the MLOps components (MLflow, CI/CD, DVC), the deployment status, and the local reproduction guide you requested.
 
-    ├── LICENSE
-    ├── Makefile           <- Makefile with commands like `make data` or `make train`
-    ├── README.md          <- The top-level README for developers using this project.
-    ├── data
-    │   ├── external       <- Data from third party sources.
-    │   ├── interim        <- Intermediate data that has been transformed.
-    │   ├── processed      <- The final, canonical data sets for modeling.
-    │   └── raw            <- The original, immutable data dump.
-    │
-    ├── docs               <- A default Sphinx project; see sphinx-doc.org for details
-    │
-    ├── models             <- Trained and serialized models, model predictions, or model summaries
-    │
-    ├── notebooks          <- Jupyter notebooks. Naming convention is a number (for ordering),
-    │                         the creator's initials, and a short `-` delimited description, e.g.
-    │                         `1.0-jqp-initial-data-exploration`.
-    │
-    ├── references         <- Data dictionaries, manuals, and all other explanatory materials.
-    │
-    ├── reports            <- Generated analysis as HTML, PDF, LaTeX, etc.
-    │   └── figures        <- Generated graphics and figures to be used in reporting
-    │
-    ├── requirements.txt   <- The requirements file for reproducing the analysis environment, e.g.
-    │                         generated with `pip freeze > requirements.txt`
-    │
-    ├── setup.py           <- makes project pip installable (pip install -e .) so src can be imported
-    ├── src                <- Source code for use in this project.
-    │   ├── __init__.py    <- Makes src a Python module
-    │   │
-    │   ├── data           <- Scripts to download or generate data
-    │   │   └── make_dataset.py
-    │   │
-    │   ├── features       <- Scripts to turn raw data into features for modeling
-    │   │   └── build_features.py
-    │   │
-    │   ├── models         <- Scripts to train models and then use trained models to make
-    │   │   │                 predictions
-    │   │   ├── predict_model.py
-    │   │   └── train_model.py
-    │   │
-    │   └── visualization  <- Scripts to create exploratory and results oriented visualizations
-    │       └── visualize.py
-    │
-    └── tox.ini            <- tox file with settings for running tox; see tox.readthedocs.io
+You can **copy and paste this entire block** directly into the `README.md` file of your main GitHub repository (`yt-chrome-plugin`).
 
+-----
 
---------
+# 🌟 YouTube Comment Sentiment Analyzer 🤖💬
 
-<p><small>Project based on the <a target="_blank" href="https://drivendata.github.io/cookiecutter-data-science/">cookiecutter data science project template</a>. #cookiecutterdatascience</small></p>
+### Project Overview
+
+The **YouTube Comment Sentiment Analyzer** is a two-part application that provides real-time sentiment analysis of comments on any YouTube video. It consists of a **Chrome Extension (Frontend)** communicating with a containerized **Python/Machine Learning (ML) API (Backend)** to classify comments as **Positive, Negative, or Neutral**.
+
+This project demonstrates a complete MLOps workflow, focusing on model reproducibility and deployment readiness.
+
+-----
+
+### 🛠️ Technology Stack & Architecture
+
+| Component | Repository | Primary Technologies | MLOps Tools |
+| :--- | :--- | :--- | :--- |
+| **Backend (ML API)** | [srvmann/yt-chrome-plugin](https://github.com/srvmann/yt-chrome-plugin) | Python, Flask, Custom ML Model, Docker | **MLflow**, **GitHub Actions** (CI), DVC |
+| **Frontend (Chrome Extension)** | [srvmann/chrome-plugin-frontend](https://github.com/srvmann/chrome-plugin-frontend) | JavaScript, HTML, Chrome Manifest | N/A |
+
+-----
+
+### 🏆 Project Excellence & MLOps Highlights
+
+This project utilizes industry tools for governance and automation, ensuring reproducibility and quality.
+
+#### 1\. MLflow Tracking Server (Experiment Reproducibility)
+
+All model training runs, parameters, and performance metrics are logged and tracked using **MLflow**, providing full auditability and the ability to reproduce any model version.
+
+  * **🌐 MLflow Tracking Server:** `http://13.203.227.156:5000/`
+
+#### 2\. Continuous Integration (CI) with GitHub Actions
+
+The code base is protected by an automated CI pipeline. Every commit triggers a workflow that runs tests, linting, and environment checks, ensuring code quality before deployment.
+
+  * **Proof of CI Flow:** View the successful workflow runs on the GitHub Actions page:
+      * [srvmann/yt-chrome-plugin GitHub Actions](https://www.google.com/search?q=https://github.com/srvmann/yt-chrome-plugin/actions)
+
+-----
+
+### 💻 Live Demonstration
+
+See the YouTube Comment Analyzer working live on a local system, demonstrating real-time comment fetching and sentiment classification.
+
+[Insert Video of Project Working on My Local System Here]
+
+-----
+
+### ⚙️ Local Reproduction Guide: ML Pipeline & Containerized API
+
+This guide details how to reproduce the project by first pulling the DVC-tracked model artifacts and then running the final application using the original container structure.
+
+#### Prerequisites
+
+1.  **Python 3.x**, **Git**, and **Docker** installed.
+2.  **DVC** (Data Version Control) installed globally (`pip install dvc`).
+3.  **YouTube Data API Key** (required for the backend to fetch comments).
+4.  **AWS CLI** configured (required for DVC to pull remote model/data from S3).
+
+#### Step 1: Clone the Backend & Setup Environment
+
+1.  **Clone and Navigate:**
+    ```bash
+    git clone https://github.com/srvmann/yt-chrome-plugin.git
+    cd yt-chrome-plugin
+    ```
+2.  **Install Dependencies:**
+    ```bash
+    python -m venv venv
+    source venv/bin/activate # Use .\venv\Scripts\activate on Windows
+    pip install -e .
+    ```
+
+#### Step 2: Reproduce Model Artifacts (DVC Pipeline)
+
+The trained model and data dependencies are versioned using DVC. This step retrieves them, ensuring the API has the necessary files to run.
+
+1.  **Retrieve Artifacts:** This pulls the trained model (the artifact) from the DVC remote storage.
+    ```bash
+    # Requires AWS credentials to be configured in your environment
+    dvc pull
+    ```
+2.  **Run ML Pipeline:** (Optional - to re-train the model)
+    ```bash
+    dvc repro
+    ```
+
+#### Step 3: Run Containerized API (`app.py`)
+
+1.  **Set Environment Variable:** Pass your required YouTube Data API Key.
+
+    ```bash
+    export YOUTUBE_API_KEY="YOUR_API_KEY_HERE" # Use 'set' or '$env:' on Windows
+    ```
+
+2.  **Run the Container:** The container executes the `flask_app/app.py` logic.
+
+    ```bash
+    # Note: Use your specific ECR URI
+    docker run -d -p 5000:5000 \
+    -e YOUTUBE_API_KEY="YOUR_API_KEY_HERE" \
+    233803224854.dkr.ecr.ap-south-1.amazonaws.com/yt-chrome-plugin:latest
+    ```
+
+    The API is now running locally at **`http://localhost:5000`**.
+
+-----
+
+### 🌐 Frontend Setup & Usage
+
+1.  **Clone the Frontend Repo:** [https://github.com/srvmann/chrome-plugin-frontend](https://github.com/srvmann/chrome-plugin-frontend)
+2.  **Install the Extension:** Go to `chrome://extensions`, enable **Developer mode**, click **Load unpacked**, and select the cloned folder.
+3.  **Test:** Open any YouTube video and click the extension icon to trigger the full analysis.
+
+-----
+
+### ☁️ AWS Deployment Status and Free Tier Limit
+
+All development and MLOps steps were completed, successfully creating a production-ready container, but the final deployment was halted due to cost constraints.
+
+  * **Registry Image:** The final container image is available on ECR: `233803224854.dkr.ecr.ap-south-1.amazonaws.com/yt-chrome-plugin:latest`.
+  * **The Limitation:** Final **code deployment** to a persistent compute service (like an **AWS EC2 instance**) was stopped because running the server 24/7 immediately consumes the **AWS Free Tier 750 hours/month limit**, risking unbudgeted charges.
+
+**Recommendation:** The most cost-effective path for cloud hosting is to deploy the container using a serverless model (e.g., **AWS Lambda with a Container Image**) to utilize pay-per-use billing.
