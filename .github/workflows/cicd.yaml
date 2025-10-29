@@ -100,16 +100,21 @@ jobs:
           AWS_DEFAULT_REGION: ap-south-1
         run: python scripts/promote_model.py
 
-      - name: Start Flask App
+      - name: Start Flask Application (Gunicorn)
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: ap-south-1
         run: |
-          nohup python flask_app/app.py &
+          export YOUTUBE_API_KEY="${{ secrets.YOUTUBE_API_KEY }}"
+          gunicorn -b 0.0.0.0:5000 --daemon flask_app.app:app
 
+
+      - name: Wait for API Server to be Ready
+        run: |
+          echo "Waiting for Flask server on port 5000..."
+          timeout 120 bash -c 'until curl --silent --fail http://localhost:5000/; do sleep 1; done'
+          
       - name: Run Flask API tests
         run: |
           pytest scripts/test_flask_api.py
-
-    
