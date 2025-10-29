@@ -3,9 +3,6 @@ yt-chrome-plugin
 
 An ML project that scrapes the comments from the current video using the YouTube API, analyses them and gives them sentiment {positive, negative, neutral} using an ML model from flask_app, which operates as a  backend.
 
-This is the final, complete, and fully formatted **README.md** file, incorporating all the project details, the MLOps components (MLflow, CI/CD, DVC), the deployment status, and the local reproduction guide you requested.
-
-You can **copy and paste this entire block** directly into the `README.md` file of your main GitHub repository (`yt-chrome-plugin`).
 
 -----
 
